@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Platform</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="{% url 'profile' %}" class="profile-icon" style="color:white;">
+            🧑🏻
+        </a>
+        <div class="nav-left">
+
+
+            <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+            <a href="/portfolio/" class="{% if request.path == '/portfolio/' %}active{% endif %}">Portfolio</a>
+            <a href="{% url 'about' %}" class="{% if request.path == '/about/' %}active{% endif %}">About</a> {% if request.user.is_authenticated and request.user.profile.role == 'writer' %}
+            <div class="dropdown">
+                <button type="button" class="dropbtn" onclick="toggleDropdown()">
+        Categories ▼
+    </button>
+
+                <div id="categoryDropdown" class="dropdown-content">
+                    <a href="/article/">Article</a>
+                    <a href="/blog/">Blog</a>
+                    <a href="/content/">Content</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="nav-right">
+            {% if request.user.is_authenticated %}
+            <span style="color:white;">Hi, {{ request.user.username }}</span> {% if request.user.profile.role == 'writer' %} {% endif %} {% if request.user.is_authenticated and request.user.profile.role == 'client' %}
+
+            <a href="{% url 'hired_writers' %}">
+                Hired Writers
+            </a> {% endif %}
+            <!-- Inbox only for logged in -->
+            <a href="{% url 'inbox' %}">Inbox</a>
+
+            <!-- Logout -->
+            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" style="background:none; border:none; color:white; cursor:pointer;">
+                Logout
+            </button>
+            </form>
+
+            {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'signup' %}">Sign Up</a> {% endif %}
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="main-content">
+        {% block content %} {% endblock %}
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById("categoryDropdown").classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdown = document.getElementById("categoryDropdown");
+                if (dropdown.classList.contains("show")) {
+                    dropdown.classList.remove("show");
+                }
+            }
+        }
+    </script>
+    <footer class="footer">
+
+        <div class="footer-content">
+
+            <h2>Content Platform</h2>
+
+            <p>
+                Connecting clients with professional writers for quality articles, blogs, and content writing.
+            </p>
+
+            <div class="footer-contact">
+                <p>Email: support@contentplatform.com</p>
+                <p>Phone: +91 7223014089</p>
+            </div>
+
+            <div class="footer-social">
+
+                <span>🌐</span>
+                <span>📘</span>
+                <span>📸</span>
+                <span>💼</span>
+
+            </div>
+
+            <p class="footer-copy">
+                © 2026 Content Platform | All Rights Reserved
+            </p>
+
+        </div>
+
+    </footer>
+</body>
+
+</html>

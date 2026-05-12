@@ -1,0 +1,45 @@
+{% extends 'main/base.html' %} {% block content %}
+
+<div class="profile-container">
+
+    <div class="profile-card">
+
+        {% if profile.profile_image %}
+        <img src="{{ profile.profile_image.url }}" class="profile-image"> {% endif %}
+
+        <h2>{{ user.username }}</h2>
+
+        <p><strong>Role:</strong> {{ profile.role }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Phone:</strong> {{ profile.phone }}</p>
+        <p><strong>Skills:</strong> {{ profile.skills }}</p>
+
+        <p><strong>Experience:</strong> {{ profile.experience }}</p>
+
+        <p><strong>Bio:</strong> {{ profile.bio }}</p>
+
+        <a href="{% url 'edit_profile' %}" class="edit-btn">
+            Edit Profile
+        </a>
+
+    </div>
+
+    <div class="analytics-card">
+
+        <h3>Analytics</h3>
+
+        <p>Total Articles: {{ articles.count }}</p>
+
+        <p>Total Blogs: {{ blogs.count }}</p>
+
+        <p>Total Contents: {{ contents.count }}</p>
+
+        <p>Average Rating: ⭐ {{ avg_rating|floatformat:1 }}</p>
+
+        <p>Total Reviews: {{ reviews.count }}</p>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'main/base.html' %} {% block content %}
+
+<div class="hero-section">
+    <h1>🚀 Welcome to My Content Writing Website</h1>
+    <p>Professional Writers for Your Business Content Needs</p>
+    <a href="/writers/" class="explore-btn">Explore Writers</a>
+</div>
+<div class="top-writers-section">
+
+    <h2>Top Rated Writers</h2>
+
+    <div class="top-writers-grid">
+
+        {% for writer in top_writers %}
+
+        <div class="top-writer-card">
+
+            <div class="writer-avatar">
+                {{ writer.user.username|first|upper }}
+            </div>
+
+            <h3>{{ writer.user.username }}</h3>
+
+            <p>⭐ {{ writer.rating }}/5</p>
+
+            <a href="/hire/{{ writer.user.id }}/" class="hire-btn">
+               Hire
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

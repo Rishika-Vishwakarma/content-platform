@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Explore Writers</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+
+
+</head>
+
+<body>
+
+    <div class="writers-container">
+
+        <div class="writers-title">Explore Writers</div>
+
+        <div class="writers-grid">
+            {% for writer in writers %}
+            <div class="writer-card">
+
+                <div class="avatar">
+                    {{ writer.user.username|first|upper }}
+                </div>
+
+                <div class="writer-name">
+                    {{ writer.user.username }}
+                </div>
+                <!-- 🔥 Hire Button -->
+                {% if request.user.profile.role == 'client' %}
+
+                <a href="{% url 'hire_writer' writer.user.id %}" class="hire-btn">
+                     Hire
+                </a> {% endif %}
+
+                <!-- ⭐ Rating -->
+                <div class="rating">
+                    ⭐ {{ writer.avg_rating|floatformat:1 }}/5
+                </div>
+
+
+                <!-- 📝 Review Form -->
+                <form method="POST" action="/review/{{ writer.user.id }}/">
+                    {% csrf_token %}
+
+                    <select name="rating">
+                        <option value="5">⭐⭐⭐⭐⭐</option>
+                        <option value="4">⭐⭐⭐⭐</option>
+                        <option value="3">⭐⭐⭐</option>
+                        <option value="2">⭐⭐</option>
+                        <option value="1">⭐</option>
+                     </select>
+
+                    <input type="text" name="comment" placeholder="Write review" class="review-input">
+                    <button type="submit">Submit</button>
+                </form>
+
+            </div>
+            {% empty %}
+            <p>No writers available</p>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</body>
+
+</html>

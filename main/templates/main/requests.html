@@ -1,0 +1,9 @@
+<h2>Hire Requests</h2>
+
+{% for req in requests %}
+<p>{{ req.client.username }}</p>
+
+{% if req.status == 'pending' %}
+<a href="{% url 'handle_request' req.id 'accept' %}">Accept</a>
+<a href="{% url 'handle_request' req.id 'reject' %}">Reject</a> {% else %}
+<span>{{ req.status }}</span> {% endif %} {% endfor %}

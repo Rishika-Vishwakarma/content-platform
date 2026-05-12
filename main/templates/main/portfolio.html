@@ -1,0 +1,289 @@
+{% extends 'main/base.html' %} {% block content %}
+
+<script>
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.style.display = 'none';
+        });
+
+        const selectedTab = document.getElementById(tabId);
+        if (selectedTab) {
+            selectedTab.style.display = 'block';
+        }
+    }
+
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get("tab") || "articles";
+        showTab(tab);
+    };
+
+    document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('comment-form')) {
+            e.preventDefault();
+
+            const form = e.target;
+            const type = form.dataset.type;
+            const id = form.dataset.id;
+            const input = form.querySelector('.comment-input');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'comment=' + encodeURIComponent(text)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const list = document.getElementById(`${type}-comments-${id}`);
+                        const countSpan = document.getElementById(`${type}-count-${id}`);
+
+                        const newComment = document.createElement('div');
+                        newComment.className = 'comment-box';
+                        newComment.textContent = text;
+                        list.appendChild(newComment);
+
+                        let count = parseInt(countSpan.textContent.replace('💬', '').trim());
+                        countSpan.textContent = `💬 ${count + 1}`;
+
+                        input.value = '';
+                    }
+                });
+        }
+    });
+
+    function toggleContent(button) {
+
+        const card = button.parentElement;
+
+        const preview =
+            card.querySelector('.content-preview');
+
+        const full =
+            card.querySelector('.full-content');
+
+        if (full.style.display === "none") {
+
+            full.style.display = "block";
+
+            preview.style.display = "none";
+
+            button.innerText = "Show Less";
+
+        } else {
+
+            full.style.display = "none";
+
+            preview.style.display = "block";
+
+            button.innerText = "Read More";
+        }
+    }
+</script>
+
+<h2 class="portfolio-heading">Explore Writers & Content</h2>
+<form method="GET" class="search-form">
+
+    <input type="text" name="q" placeholder="Search by topic..." class="search-input">
+
+    <button type="submit" class="search-btn">
+        Search
+    </button>
+
+</form>
+<div class="portfolio-tabs">
+    <a href="#" onclick="showTab('articles'); return false;">Articles</a>
+    <a href="#" onclick="showTab('blogs'); return false;">Blogs</a>
+    <a href="#" onclick="showTab('contents'); return false;">Contents</a>
+</div>
+
+<!-- ARTICLES -->
+<div id="articles" class="tab-content">
+    <div class="cards-container">
+        {% for article in articles %}
+        <div class="article-card">
+            <h3>By {{ article.name }}</h3>
+            <h2>{{ article.title }}</h2>
+
+            {% if article.image %}
+            <img src="{{ article.image.url }}" alt="Article Image"> {% endif %}
+
+            <p class="content-preview">
+
+                {{ article.content|truncatewords:25 }}
+
+            </p>
+
+            <p class="full-content" style="display:none;">
+
+                {{ article.content }}
+
+            </p>
+
+            <button class="read-more-btn" onclick="toggleContent(this)">
+
+                Read More
+
+            </button>
+            <div class="card-actions">
+                <a href="{% url 'like_article' article.id %}" class="like-btn">❤️</a>
+                <span>{{ article.likes }}</span>
+
+                <span id="article-count-{{ article.id }}">💬 {{ article.comments.count }}</span> {% if request.user == article.user %}
+                <a href="{% url 'edit_article' article.id %}" class="edit-btn">Edit</a>
+                <a href="{% url 'delete_article' article.id %}" class="delete-btn">Delete</a> {% endif %} {% if request.user.profile.role == 'client' %} {% if article.user %}
+
+                <a href="{% url 'hire_writer' article.user.id %}" class="hire-btn">
+            Hire
+        </a> {% endif %} {% endif %}
+            </div>
+
+            <div class="comments-list" id="article-comments-{{ article.id }}">
+                {% for comment in article.comments.all %}
+                <div class="comment-box">{{ comment.text }}</div>
+                {% endfor %}
+
+
+            </div>
+
+            <form method="POST" action="{% url 'add_comment' article.id %}" class="comment-form" data-type="article" data-id="{{ article.id }}">
+                {% csrf_token %}
+                <input type="text" name="comment" class="comment-input" placeholder="Add a comment...">
+                <button type="submit" class="comment-btn">Post</button>
+
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- BLOGS -->
+<div id="blogs" class="tab-content" style="display:none;">
+    <div class="cards-container">
+        {% for blog in blogs %}
+        <div class="article-card">
+            <h3>By {{ blog.name }}</h3>
+            <h2>{{ blog.title }}</h2>
+
+            {% if blog.image %}
+            <img src="{{ blog.image.url }}" alt="Blog Image"> {% endif %}
+
+            <p class="content-preview">
+
+                {{ blog.content|truncatewords:25 }}
+
+            </p>
+
+            <p class="full-content" style="display:none;">
+
+                {{ blog.content }}
+
+            </p>
+
+            <button class="read-more-btn" onclick="toggleContent(this)">
+
+            Read More
+
+            </button>
+
+            <div class="card-actions">
+                <a href="{% url 'like_blog' blog.id %}" class="like-btn">❤️</a>
+                <span>{{ blog.likes }}</span>
+
+                <span id="blog-count-{{ blog.id }}">💬 {{ blog.comments.count }}</span> {% if request.user == blog.user %}
+                <a href="{% url 'edit_blog' blog.id %}" class="edit-btn">Edit</a>
+                <a href="{% url 'delete_blog' blog.id %}" class="delete-btn">Delete</a> {% endif %}
+                <!-- 🔥 HIRE BUTTON (SEPARATE) -->
+                {% if request.user.profile.role == 'client' %} {% if blog.user %}
+
+                <a href="{% url 'hire_writer' blog.user.id %}" class="hire-btn">
+                    Hire
+                </a> {% endif %} {% endif %}
+
+            </div>
+
+            <div class="comments-list" id="blog-comments-{{ blog.id }}">
+                {% for comment in blog.comments.all %}
+                <div class="comment-box">{{ comment.text }}</div>
+                {% endfor %}
+            </div>
+
+            <form method="POST" action="{% url 'add_blog_comment' blog.id %}" class="comment-form" data-type="blog" data-id="{{ blog.id }}">
+                {% csrf_token %}
+                <input type="text" name="comment" class="comment-input" placeholder="Add a comment...">
+                <button type="submit" class="comment-btn">Post</button>
+
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- CONTENTS -->
+<div id="contents" class="tab-content" style="display:none;">
+    <div class="cards-container">
+        {% for content in contents %}
+        <div class="article-card">
+            <h3>By {{ content.name }}</h3>
+            <h2>{{ content.title }}</h2>
+
+            {% if content.image %}
+            <img src="{{ content.image.url }}" alt="Content Image"> {% endif %}
+
+            <p class="content-preview">
+
+                {{ content.content|truncatewords:25 }}
+
+            </p>
+
+            <p class="full-content" style="display:none;">
+
+                {{ content.content }}
+
+            </p>
+
+            <button class="read-more-btn" onclick="toggleContent(this)">
+
+                Read More
+
+            </button>
+            <div class="card-actions">
+                <a href="{% url 'like_content' content.id %}" class="like-btn">❤️</a>
+                <span>{{ content.likes }}</span>
+
+                <span id="content-count-{{ content.id }}">💬 {{ content.comments.count }}</span> {% if request.user == content.user %}
+                <a href="{% url 'edit_content' content.id %}" class="edit-btn">Edit</a>
+                <a href="{% url 'delete_content' content.id %}" class="delete-btn">Delete</a> {% endif %}
+                <!-- 🔥 HIRE BUTTON  -->
+                {% if request.user.profile.role == 'client' %} {% if content.user %}
+
+                <a href="{% url 'hire_writer' content.user.id %}" class="hire-btn">
+            Hire
+        </a> {% endif %} {% endif %}
+
+
+            </div>
+
+            <div class="comments-list" id="content-comments-{{ content.id }}">
+                {% for comment in content.comments.all %}
+                <div class="comment-box">{{ comment.text }}</div>
+                {% endfor %}
+            </div>
+
+            <form method="POST" action="{% url 'add_content_comment' content.id %}" class="comment-form" data-type="content" data-id="{{ content.id }}">
+                {% csrf_token %}
+                <input type="text" name="comment" class="comment-input" placeholder="Add a comment...">
+                <button type="submit" class="comment-btn">Post</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

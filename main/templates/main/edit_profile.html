@@ -1,0 +1,26 @@
+{% extends 'main/base.html' %} {% block content %}
+
+<div class="form-container">
+
+    <h2>Edit Profile</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <input type="text" name="skills" placeholder="Skills" value="{{ profile.skills }}" class="form-input">
+
+        <input type="text" name="experience" placeholder="Experience" value="{{ profile.experience }}" class="form-input">
+
+        <textarea name="bio" placeholder="Bio" class="form-textarea">{{ profile.bio }}</textarea>
+
+        <input type="file" name="profile_image" class="form-input">
+
+        <button type="submit" class="comment-btn">
+            Save Profile
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
