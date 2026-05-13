@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Article, Blog, Content, Profile, HireRequest, Chat, Message
+from .models import HireRequest
 
 admin.site.register(Article)
 admin.site.register(Blog)
